@@ -19,6 +19,8 @@ A full-stack, browser-based video editor built with the MERN stack (MongoDB, Exp
 - **Database:** MongoDB (optional, for saving user sessions/projects)
 - **Video Processing:** ffmpeg.wasm (client-side), ffmpeg (server-side, future)
 
+- LIVE LINK -> https://video-direct-x.vercel.app/
+
 ## Project Structure
 ```
 video-editor/
