@@ -12,8 +12,10 @@ export default function Dropzone({ onFiles }) {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       onFiles(Array.from(e.dataTransfer.files));
     }
+
   };
 
+  
   const handleDragOver = e => {
     e.preventDefault();
     setDragActive(true);
