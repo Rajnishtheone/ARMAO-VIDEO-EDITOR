@@ -67,7 +67,7 @@ function App() {
   const [muteApplying, setMuteApplying] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreviewURL, setPhotoPreviewURL] = useState('');
-  const [photoOverlay, setPhotoOverlay] = useState({ x: 50, y: 50, width: 120, height: 80, start: 0, end: 10 });
+  const [photoOverlay, setPhotoOverlay] = useState({ x: 50, y: 50, width: 120, height: 80, opacity: 1.0});
   const [photoStatus, setPhotoStatus] = useState('');
   const [photoApplying, setPhotoApplying] = useState(false);
   const [textOverlay, setTextOverlay] = useState({ text: '', font: 'Arial', size: 36, color: '#ffffff', x: 50, y: 80, start: 0, end: 10, animation: 'none' });
@@ -188,33 +188,72 @@ function App() {
   };
 
   // Trim preview handler
+  // const handleTrimPreview = async () => {
+  //   if (!videoFile) return;
+  //   setTrimApplying(true);
+  //   setTrimStatus('Previewing...');
+  //   const formData = new FormData();
+  //   formData.append('videos', videoFile);
+  //   formData.append('start_0', String(trimStart));
+  //   formData.append('end_0', String(trimEnd));
+  //   formData.append('order', JSON.stringify([0]));
+  //   formData.append('exportFormat', 'mp4');
+  //   formData.append('exportResolution', 'original');
+  //   try {
+  //     const res = await fetch('http://localhost:5000/api/merge', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+  //     console.log(formData);
+  //     if (!res.ok) throw new Error('Trim preview failed');
+  //     const blob = await res.blob();
+  //     const url = URL.createObjectURL(blob);
+  //     setTrimPreviewURL(url);
+  //     setTrimStatus('Preview ready. Click Apply to save.');
+  //   } catch (err) {
+  //     setTrimStatus(err.message || 'Trim preview failed');
+  //     setTrimPreviewURL('');
+  //   }
+  //   setTrimApplying(false);
+  // };
+
   const handleTrimPreview = async () => {
-    if (!videoFile) return;
-    setTrimApplying(true);
-    setTrimStatus('Previewing...');
-    const formData = new FormData();
-    formData.append('videos', videoFile);
-    formData.append('start_0', trimStart);
-    formData.append('end_0', trimEnd);
-    formData.append('order', JSON.stringify([0]));
-    formData.append('exportFormat', 'mp4');
-    formData.append('exportResolution', 'original');
-    try {
-      const res = await fetch('http://localhost:5000/api/merge', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!res.ok) throw new Error('Trim preview failed');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      setTrimPreviewURL(url);
-      setTrimStatus('Preview ready. Click Apply to save.');
-    } catch (err) {
-      setTrimStatus(err.message || 'Trim preview failed');
-      setTrimPreviewURL('');
+  if (!videoFile) return;
+  setTrimApplying(true);
+  setTrimStatus('Previewing...');
+
+  const formData = new FormData();
+  formData.append('videos', videoFile);
+  formData.append('start_0', String(trimStart));
+  if (trimEnd != null) formData.append('end_0', String(trimEnd));
+  formData.append('order', JSON.stringify([0]));
+  formData.append('exportFormat', 'mp4');
+  formData.append('exportResolution', 'original');
+
+  try {
+    const res = await fetch('http://localhost:5000/api/merge', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(errText || 'Trim preview failed');
     }
-    setTrimApplying(false);
-  };
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    setTrimPreviewURL(url);
+    setTrimStatus('Preview ready. Click Apply to save.');
+  } catch (err) {
+    setTrimStatus(err.message || 'Trim preview failed');
+    setTrimPreviewURL('');
+  }
+
+  setTrimApplying(false);
+};
+
+
   const handleTrimApply = () => {
     setVideoURL(trimPreviewURL);
     setTrimPreviewURL('');
@@ -278,6 +317,8 @@ function App() {
     setPhotoFile(file);
     setPhotoPreviewURL(file ? URL.createObjectURL(file) : '');
   };
+
+
   const handlePhotoApply = async () => {
     if (!videoFile || !photoFile) return;
     setPhotoApplying(true);
@@ -285,6 +326,11 @@ function App() {
     const formData = new FormData();
     formData.append('video', videoFile);
     formData.append('image', photoFile);
+    formData.append("x", photoOverlay.x);
+    formData.append("y", photoOverlay.y);
+    formData.append("width", photoOverlay.width);
+    formData.append("height", photoOverlay.height);
+    formData.append("opacity", photoOverlay.opacity);
     // Optionally, send overlay position, size, and duration if backend supports
     try {
       const res = await fetch('http://localhost:5000/api/overlay/image', {
@@ -372,7 +418,7 @@ function App() {
             {selectedTool === 'audio' && <AudioPanel videoFile={videoFile} videoURL={videoURL} songFile={songFile} setSongFile={setSongFile} songPreviewURL={songPreviewURL} songStart={songStart} setSongStart={setSongStart} songApplying={songApplying} songStatus={songStatus} handleSongApply={handleSongApply} />}
             {selectedTool === 'speed' && <SpeedPanel videoFile={videoFile} videoURL={videoURL} isMuted={isMuted} setIsMuted={setIsMuted} muteApplying={muteApplying} muteStatus={muteStatus} handleMuteApply={handleMuteApply} />}
             {selectedTool === 'merge' && <MergePanel timelineClips={timelineClips} exportFormat={exportFormat} setExportFormat={setExportFormat} exportResolution={exportResolution} setExportResolution={setExportResolution} handleExport={handleExport} exportStatus={exportStatus} exportURL={exportURL} />}
-            <Toolbar
+            {/* <Toolbar
               videoFile={videoFile}
               trimRange={trimRange}
               effectParams={effectParams}
@@ -381,7 +427,7 @@ function App() {
               audioFile={audioFile}
               onVideoUpdate={handleVideoUpdate}
               onFeedback={handleFeedback}
-            />
+            /> */}
             <TimelineBar
               clips={timelineClips}
               videoURL={videoURL}
