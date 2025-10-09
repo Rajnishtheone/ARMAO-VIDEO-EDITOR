@@ -2,12 +2,32 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Rnd } from 'react-rnd';
 
+ const positionPresets = {
+    "top-left": { x: "10", y: "10" },
+    "top-right": { x: "main_w-overlay_w-10", y: "10" },
+    "bottom-left": { x: "10", y: "main_h-overlay_h-10" },
+    "bottom-right": { x: "main_w-overlay_w-10", y: "main_h-overlay_h-10" },
+    "center": { x: "(main_w-overlay_w)/2", y: "(main_h-overlay_h)/2"},
+  };
+
+
+
 export default function ImagePanel({ videoFile, videoURL, photoFile, setPhotoFile, photoPreviewURL, photoOverlay, setPhotoOverlay, photoApplying, photoStatus, handlePhotoApply }) {
   // Default size and position
   const defaultWidth = 120;
   const defaultHeight = 80;
   const defaultX = 200;
   const defaultY = 100;
+
+  const setPresetPosition = (position) => {
+    if (positionPresets[position]) {
+      setPhotoOverlay({
+        ...photoOverlay,
+        x: positionPresets[position].x,
+        y: positionPresets[position].y,
+      });
+    }
+  };
 
   // If no overlay position, center it
   const overlay = photoOverlay || { x: defaultX, y: defaultY, width: defaultWidth, height: defaultHeight, start: 0, end: 10 };
@@ -37,6 +57,17 @@ export default function ImagePanel({ videoFile, videoURL, photoFile, setPhotoFil
           <input type="number" min={0} value={overlay.start} onChange={e => setPhotoOverlay({ ...overlay, start: Number(e.target.value) })} style={{ width: 60 }} />
           <span>End (s)</span>
           <input type="number" min={overlay.start} value={overlay.end} onChange={e => setPhotoOverlay({ ...overlay, end: Number(e.target.value) })} style={{ width: 60 }} />
+          
+          <span>Position</span>
+          <select value={positionPresets.position} onChange={e => setPresetPosition(e.target.value)}>
+          {Object.keys(positionPresets).map(position => ( 
+            <option key={position} value={position}>{position.replace('-', ' ')}</option>
+          ))}
+          </select>
+
+          <span>Opacity</span>
+          <input type="number" min={0} max={1} step={0.1} value={photoOverlay.opacity} onChange={e => setPhotoOverlay({ ...overlay, opacity: parseFloat(e.target.value) })} style={{ width: 60 }} />
+          
           <button onClick={handlePhotoApply} disabled={!photoFile || photoApplying} style={{ padding: '8px 16px', borderRadius: 6, background: '#2196f3', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', marginTop: 8 }}>Apply</button>
         </Box>
       </Box>
