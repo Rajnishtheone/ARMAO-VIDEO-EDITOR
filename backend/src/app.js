@@ -5,6 +5,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const filterRoutes = require('./routes/filters');
+const mergeRoute = require('./routes/mergeRoute'); 
+const exportRoute = require('./routes/exportRoute');
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath('C:/ffmpeg/bin/ffmpeg.exe');
 
@@ -39,6 +41,8 @@ app.post('/api/upload', upload.single('video'), (req, res) => {
 });
 
 app.use('/api', filterRoutes);
+app.use('/api/merge', mergeRoute);
+app.use('/api/export', exportRoute);
 
 app.get('/api/ping', (req, res) => {
   res.json({ message: 'pong' });

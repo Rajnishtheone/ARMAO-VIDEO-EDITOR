@@ -1,0 +1,31 @@
+{
+    "inputPath": "/uploads/input.mp4",
+    "effectFilters":[
+        {
+            "brightness": 0,
+            "contrast": 1,
+            "saturation": 1,
+            "filterType": "brightness"
+        }
+    ],
+    "textOverlay":[],
+    "imageOverlay":[
+        {
+            "imagePath": "/uploads/image.png",
+            "params": {
+                "x": "10",
+                "y": "10",
+                "width": "",
+                "height": "",
+                "opacity": ""
+            }
+        }
+    ],
+    "mute": false,
+    "replaceAudio": [
+        {
+            "audioPath": "/uploads/audio.mp3"
+        }
+    ]
+
+}
