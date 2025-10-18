@@ -222,119 +222,119 @@ router.post('/audio/replace', upload.fields([{ name: 'video' }, { name: 'audio' 
 
 // Merge videos with trim, order, fade, speed, export format/resolution
 
-router.post('/merge', upload.array('videos', 10), (req, res) => { 
-  try {
-    console.log('Received files:', req.files);
+// router.post('/merge', upload.array('videos', 10), (req, res) => { 
+//   try {
+//     console.log('Received files:', req.files);
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
-    }
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ error: 'No files uploaded' });
+//     }
 
-    // Ensure uploads dir exists
-    const uploadDir = path.resolve('uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+//     // Ensure uploads dir exists
+//     const uploadDir = path.resolve('uploads');
+//     if (!fs.existsSync(uploadDir)) {
+//       fs.mkdirSync(uploadDir, { recursive: true });
+//     }
 
-    // Normalize input file paths
-    const filePaths = req.files.map(f => path.resolve(f.path).replace(/\\/g, '/'));
+//     // Normalize input file paths
+//     const filePaths = req.files.map(f => path.resolve(f.path).replace(/\\/g, '/'));
 
-    const exportFormat = req.body.exportFormat || 'mp4';
-    const exportResolution = req.body.exportResolution || 'original';
-    const outputPath = path.resolve(uploadDir, `${Date.now()}-merged.${exportFormat}`).replace(/\\/g, '/');
-    console.log('FFmpeg writing to:', outputPath);
+//     const exportFormat = req.body.exportFormat || 'mp4';
+//     const exportResolution = req.body.exportResolution || 'original';
+//     const outputPath = path.resolve(uploadDir, `${Date.now()}-merged.${exportFormat}`).replace(/\\/g, '/');
+//     console.log('FFmpeg writing to:', outputPath);
 
-    const order = req.body.order ? JSON.parse(req.body.order) : filePaths.map((_, i) => i);
+//     const order = req.body.order ? JSON.parse(req.body.order) : filePaths.map((_, i) => i);
 
-    // Prepare clip objects
-    const clips = order.map(idx => {
-      const start = Number(req.body[`start_${idx}`] || 0);
-      const end = req.body[`end_${idx}`] ? Number(req.body[`end_${idx}`]) : null;
-      const fadeIn = req.body[`fadeIn_${idx}`] === 'true';
-      const fadeOut = req.body[`fadeOut_${idx}`] === 'true';
-      const speed = Number(req.body[`speed_${idx}`] || 1);
-      return { path: filePaths[idx], start, end, fadeIn, fadeOut, speed };
-    });
+//     // Prepare clip objects
+//     const clips = order.map(idx => {
+//       const start = Number(req.body[`start_${idx}`] || 0);
+//       const end = req.body[`end_${idx}`] ? Number(req.body[`end_${idx}`]) : null;
+//       const fadeIn = req.body[`fadeIn_${idx}`] === 'true';
+//       const fadeOut = req.body[`fadeOut_${idx}`] === 'true';
+//       const speed = Number(req.body[`speed_${idx}`] || 1);
+//       return { path: filePaths[idx], start, end, fadeIn, fadeOut, speed };
+//     });
 
-    // Build FFmpeg complex filter
-    let filterChains = [];
-    let filterInputs = '';
-    clips.forEach((clip, i) => {
-      let chain = `[${i}:v]`;
-      let filters = [];
+//     // Build FFmpeg complex filter
+//     let filterChains = [];
+//     let filterInputs = '';
+//     clips.forEach((clip, i) => {
+//       let chain = `[${i}:v]`;
+//       let filters = [];
 
-      // Trimming
-      if (clip.start !== 0 || clip.end !== null) {
-        let trim = `trim=start=${clip.start}`;
-        if (clip.end !== null) trim += `:end=${clip.end}`;
-        filters.push(trim, 'setpts=PTS-STARTPTS');
-      }
+//       // Trimming
+//       if (clip.start !== 0 || clip.end !== null) {
+//         let trim = `trim=start=${clip.start}`;
+//         if (clip.end !== null) trim += `:end=${clip.end}`;
+//         filters.push(trim, 'setpts=PTS-STARTPTS');
+//       }
 
-      // Speed adjustment
-      if (clip.speed !== 1) {
-        filters.push(`setpts=${(1 / clip.speed).toFixed(3)}*PTS`);
-      }
+//       // Speed adjustment
+//       if (clip.speed !== 1) {
+//         filters.push(`setpts=${(1 / clip.speed).toFixed(3)}*PTS`);
+//       }
 
-      // Fade in/out
-      if (clip.fadeIn) filters.push('fade=t=in:st=0:d=1');
-      if (clip.fadeOut && clip.end !== null) {
-        filters.push(`fade=t=out:st=${Math.max(0, clip.end - clip.start - 1)}:d=1`);
-      }
+//       // Fade in/out
+//       if (clip.fadeIn) filters.push('fade=t=in:st=0:d=1');
+//       if (clip.fadeOut && clip.end !== null) {
+//         filters.push(`fade=t=out:st=${Math.max(0, clip.end - clip.start - 1)}:d=1`);
+//       }
 
-      filters.push('format=yuv420p');
+//       filters.push('format=yuv420p');
 
-      chain += filters.join(',');
-      chain += `[v${i}]`;
-      filterChains.push(chain);
-      filterInputs += `[v${i}]`;
-    });
+//       chain += filters.join(',');
+//       chain += `[v${i}]`;
+//       filterChains.push(chain);
+//       filterInputs += `[v${i}]`;
+//     });
 
-    filterInputs += `concat=n=${clips.length}:v=1:a=0[outv]`;
-    const filterComplex = [...filterChains, filterInputs].join(';');
+//     filterInputs += `concat=n=${clips.length}:v=1:a=0[outv]`;
+//     const filterComplex = [...filterChains, filterInputs].join(';');
 
-    // Prepare FFmpeg command
-    let ffmpegCmd = ffmpeg();
-    clips.forEach(clip => {
-      ffmpegCmd = ffmpegCmd.addInput(clip.path);
-    });
+//     // Prepare FFmpeg command
+//     let ffmpegCmd = ffmpeg();
+//     clips.forEach(clip => {
+//       ffmpegCmd = ffmpegCmd.addInput(clip.path);
+//     });
 
-    // Output options
-    let resolutionMap = { '480p': 'scale=-2:480', '720p': 'scale=-2:720', '1080p': 'scale=-2:1080' };
-    let outputOptions = ['-map', '[outv]'];
+//     // Output options
+//     let resolutionMap = { '480p': 'scale=-2:480', '720p': 'scale=-2:720', '1080p': 'scale=-2:1080' };
+//     let outputOptions = ['-map', '[outv]'];
 
-    // ⚠️ On some Windows ffmpeg builds, faststart causes "Invalid argument"
-    outputOptions.push('-movflags', 'faststart');
+//     // ⚠️ On some Windows ffmpeg builds, faststart causes "Invalid argument"
+//     outputOptions.push('-movflags', 'faststart');
 
-    if (exportResolution !== 'original' && resolutionMap[exportResolution]) {
-      outputOptions.push('-vf', resolutionMap[exportResolution]);
-    }
+//     if (exportResolution !== 'original' && resolutionMap[exportResolution]) {
+//       outputOptions.push('-vf', resolutionMap[exportResolution]);
+//     }
 
-    let formatOptions = { mp4: ['-c:v', 'libx264'], webm: ['-c:v', 'libvpx'], mov: ['-c:v', 'prores_ks'] };
-    if (formatOptions[exportFormat]) outputOptions.push(...formatOptions[exportFormat]);
+//     let formatOptions = { mp4: ['-c:v', 'libx264'], webm: ['-c:v', 'libvpx'], mov: ['-c:v', 'prores_ks'] };
+//     if (formatOptions[exportFormat]) outputOptions.push(...formatOptions[exportFormat]);
 
-    ffmpegCmd
-      .complexFilter(filterComplex, ['outv'])
-      .outputOptions(...outputOptions)
-      .output(outputPath) // ✅ no quotes
-      .on('end', () => {
-        console.log('FFmpeg finished, sending file...');
-        res.download(outputPath, () => {
-          filePaths.forEach(p => fs.existsSync(p) && fs.unlinkSync(p));
-          fs.existsSync(outputPath) && fs.unlinkSync(outputPath);
-        });
-      })
-      .on('error', err => {
-        console.error('FFmpeg error:', err.message);
-        res.status(500).json({ error: err.message });
-        filePaths.forEach(p => fs.existsSync(p) && fs.unlinkSync(p));
-        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-      })
-      .run();
+//     ffmpegCmd
+//       .complexFilter(filterComplex, ['outv'])
+//       .outputOptions(...outputOptions)
+//       .output(outputPath) // ✅ no quotes
+//       .on('end', () => {
+//         console.log('FFmpeg finished, sending file...');
+//         res.download(outputPath, () => {
+//           filePaths.forEach(p => fs.existsSync(p) && fs.unlinkSync(p));
+//           fs.existsSync(outputPath) && fs.unlinkSync(outputPath);
+//         });
+//       })
+//       .on('error', err => {
+//         console.error('FFmpeg error:', err.message);
+//         res.status(500).json({ error: err.message });
+//         filePaths.forEach(p => fs.existsSync(p) && fs.unlinkSync(p));
+//         if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+//       })
+//       .run();
 
-  } catch (err) {
-    console.error('Merge error:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
+//   } catch (err) {
+//     console.error('Merge error:', err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 module.exports = router; 

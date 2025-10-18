@@ -28,6 +28,8 @@ import AudioPanel from './components/AudioPanel';
 import SpeedPanel from './components/SpeedPanel';
 import MergePanel from './components/MergePanel';
 
+import useVideoSchema from './hooks/useVideoSchema';
+
 function App() {
   const [themeMode, setThemeMode] = useState('dark');
   const theme = useMemo(() => getTheme(themeMode), [themeMode]);
@@ -74,6 +76,8 @@ function App() {
   const [textStatus, setTextStatus] = useState('');
   const [textApplying, setTextApplying] = useState(false);
   const [selectedTool, setSelectedTool] = useState('trim');
+  
+  const [schema, setSchema] = useVideoSchema();
 
   // Handle file drop/upload
   const handleDropzoneFiles = files => {
@@ -127,6 +131,40 @@ function App() {
   };
 
   // Export handler
+  // const handleExport = async () => {
+  //   if (!timelineClips.length) {
+  //     setExportStatus('No clips to export.');
+  //     return;
+  //   }
+  //   setExportStatus('Exporting...');
+  //   setExportURL('');
+  //   const formData = new FormData();
+  //   timelineClips.forEach((clip, idx) => {
+  //     formData.append('videos', clip.file);
+  //     formData.append(`start_${idx}`, clip.start || 0);
+  //     formData.append(`end_${idx}`, clip.end || '');
+  //     formData.append(`fadeIn_${idx}`, clip.fadeIn || false);
+  //     formData.append(`fadeOut_${idx}`, clip.fadeOut || false);
+  //     formData.append(`speed_${idx}`, clip.speed || 1);
+  //   });
+  //   formData.append('order', JSON.stringify(timelineClips.map((_, i) => i)));
+  //   formData.append('exportFormat', exportFormat);
+  //   formData.append('exportResolution', exportResolution);
+  //   try {
+  //     const res = await fetch('http://localhost:5000/api/merge/merge', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+  //     if (!res.ok) throw new Error('Export failed');
+  //     const blob = await res.blob();
+  //     const url = URL.createObjectURL(blob);
+  //     setExportURL(url);
+  //     setExportStatus('Export successful!');
+  //   } catch (err) {
+  //     setExportStatus(err.message || 'Export failed');
+  //   }
+  // };
+
   const handleExport = async () => {
     if (!timelineClips.length) {
       setExportStatus('No clips to export.');
@@ -135,19 +173,18 @@ function App() {
     setExportStatus('Exporting...');
     setExportURL('');
     const formData = new FormData();
-    timelineClips.forEach((clip, idx) => {
-      formData.append('videos', clip.file);
-      formData.append(`start_${idx}`, clip.start || 0);
-      formData.append(`end_${idx}`, clip.end || '');
-      formData.append(`fadeIn_${idx}`, clip.fadeIn || false);
-      formData.append(`fadeOut_${idx}`, clip.fadeOut || false);
-      formData.append(`speed_${idx}`, clip.speed || 1);
-    });
-    formData.append('order', JSON.stringify(timelineClips.map((_, i) => i)));
+    formData.append('video', videoFile);
+    if(photoFile){
+      formData.append('image', photoFile);
+    }
+    if (songFile){
+      formData.append('audio', songFile);
+    }
+    formData.append('effects', JSON.stringify(schema));
     formData.append('exportFormat', exportFormat);
     formData.append('exportResolution', exportResolution);
     try {
-      const res = await fetch('http://localhost:5000/api/merge', {
+      const res = await fetch('http://localhost:5000/api/export/export', {
         method: 'POST',
         body: formData,
       });
@@ -172,6 +209,12 @@ function App() {
     formData.append('brightness', params.brightness);
     formData.append('contrast', params.contrast);
     formData.append('saturation', params.saturation);
+
+    setSchema((prev) => ({
+      ...prev,
+      effectFilter: { brightness: params.brightness, contrast: params.contrast, saturation: params.saturation, filterType: params.filterType },
+    }));
+
     try {
       const res = await fetch('http://localhost:5000/api/filter', {
         method: 'POST',
@@ -332,6 +375,12 @@ function App() {
     formData.append("height", photoOverlay.height);
     formData.append("opacity", photoOverlay.opacity);
     // Optionally, send overlay position, size, and duration if backend supports
+
+    setSchema((prev) => ({
+      ...prev,
+      imageOverlay: { x: photoOverlay.x, y: photoOverlay.y, width: photoOverlay.width, height: photoOverlay.height, opacity: photoOverlay.opacity },
+    }));
+
     try {
       const res = await fetch('http://localhost:5000/api/overlay/image', {
         method: 'POST',
@@ -360,6 +409,12 @@ function App() {
     formData.append("x", textOverlay.x);
     formData.append("y", textOverlay.y);
     // Optionally, send x, y, font, start, end, animation if backend supports
+
+    setSchema((prev) => ({
+      ...prev,
+      textOverlay: { text: textOverlay.text, fontSize: textOverlay.size, fontColor: textOverlay.color, x: textOverlay.x, y: textOverlay.y, width: 0, height: 0 },
+    }));
+
     try {
       const res = await fetch('http://localhost:5000/api/overlay/text', {
         method: 'POST',
