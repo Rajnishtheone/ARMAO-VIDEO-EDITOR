@@ -4,3 +4,5 @@ dist/
 .env
 .DS_Store 
 *.mp4
+*.mp3
+backend/storage/uploads/
