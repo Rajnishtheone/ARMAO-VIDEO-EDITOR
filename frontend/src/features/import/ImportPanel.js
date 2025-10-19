@@ -1,12 +1,9 @@
 import React from 'react';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
-import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
-import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import ButtonBase from '@mui/material/ButtonBase';
+import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 
 import useEditorActions from '../../hooks/useEditorActions';
 
@@ -33,52 +30,49 @@ const ImportPanel = () => {
       sx={{
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
+        alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 2,
-        p: 3,
-        border: theme => `1px solid ${theme.palette.primary.main}24`,
-        background: theme => `linear-gradient(135deg, ${theme.palette.primary.main}1f, transparent 70%)`,
-        boxShadow: theme => `0 32px 65px -55px ${theme.palette.primary.main}cc`,
+        borderRadius: 3,
+        minHeight: { xs: 320, md: 360 },
+        bgcolor: theme => `${theme.palette.background.paper}f2`,
+        border: theme => `1px solid ${theme.palette.common.black}26`,
+        px: { xs: 2, md: 3 },
       }}
     >
-      <CardContent sx={{ p: 0 }}>
-        <Stack spacing={3}>
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <Chip
-              icon={<AutoAwesomeRoundedIcon />}
-              label="Step 1"
-              color="primary"
-              variant="outlined"
-              sx={{ borderRadius: 999 }}
-            />
-            <Typography variant="caption" color="text.secondary">
-              Import your base footage to unlock every tool.
+      <Stack spacing={1.8} alignItems="center" sx={{ width: '100%', maxWidth: 400 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          Start here
+        </Typography>
+        <ButtonBase
+          component="label"
+          sx={{
+            width: '100%',
+            borderRadius: 5,
+            border: theme => `2px dashed ${theme.palette.primary.main}`,
+            backgroundColor: theme => `${theme.palette.primary.main}14`,
+            padding: { xs: 5, md: 6 },
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1.3,
+            color: 'primary.main',
+          }}
+        >
+          <FolderRoundedIcon sx={{ fontSize: 38 }} />
+          <Stack spacing={0.5} alignItems="center">
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.2rem' }}>
+              Add files
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Or drop files here
             </Typography>
           </Stack>
-          <Stack spacing={1}>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Bring your hero clip onboard
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Uploading a new video resets the live session, giving you a clean slate for edits, overlays, and exports.
-            </Typography>
-          </Stack>
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<CloudUploadRoundedIcon />}
-            sx={{
-              alignSelf: 'flex-start',
-              background: theme => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              boxShadow: '0 20px 40px -30px rgba(99,102,241,0.8)',
-            }}
-          >
-            Upload video
-            <input type="file" hidden accept="video/*" onChange={handleVideoUpload} />
-          </Button>
-        </Stack>
-      </CardContent>
+          <input type="file" hidden accept="video/*" onChange={handleVideoUpload} />
+        </ButtonBase>
+        <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center', maxWidth: 320 }}>
+          Uploading a new video resets the current session so you can craft edits with a clean slate.
+        </Typography>
+      </Stack>
     </Card>
   );
 };

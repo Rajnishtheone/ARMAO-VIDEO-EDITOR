@@ -2,33 +2,33 @@ import { createTheme } from '@mui/material/styles';
 
 const palettes = {
   light: {
-    primary: { main: '#6366f1' },
-    secondary: { main: '#f472b6' },
+    primary: { main: '#facc15', contrastText: '#111827' },
+    secondary: { main: '#fde047' },
     background: {
-      default: '#f5f7ff',
-      paper: '#ffffffd9',
+      default: '#f3f4f6',
+      paper: '#ffffff',
     },
     text: {
-      primary: '#151a2d',
-      secondary: '#4c5975',
+      primary: '#111827',
+      secondary: '#4b5563',
     },
     gradient: {
-      hero: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(244,114,182,0.2))',
+      hero: 'linear-gradient(135deg, rgba(250,204,21,0.1), rgba(15,23,42,0.08))',
     },
   },
   dark: {
-    primary: { main: '#8b5cf6' },
-    secondary: { main: '#f472b6' },
+    primary: { main: '#facc15', contrastText: '#14161b' },
+    secondary: { main: '#fde047' },
     background: {
-      default: '#070815',
-      paper: '#0b1120f2',
+      default: '#0f1117',
+      paper: '#181b23',
     },
     text: {
-      primary: '#f8fafc',
-      secondary: '#94a3b8',
+      primary: '#f9fafb',
+      secondary: '#9ca3af',
     },
     gradient: {
-      hero: 'linear-gradient(135deg, rgba(139,92,246,0.18), rgba(236,72,153,0.15))',
+      hero: 'linear-gradient(135deg, rgba(250,204,21,0.12), rgba(15,17,23,0.05))',
     },
   },
 };
@@ -50,19 +50,14 @@ export const getTheme = (mode = 'dark') => {
       button: {
         textTransform: 'none',
         fontWeight: 600,
-        letterSpacing: '0.02em',
+        letterSpacing: '0.01em',
       },
       h6: {
         fontWeight: 700,
         letterSpacing: '0.04em',
       },
     },
-    shadows: [
-      'none',
-      '0 10px 25px -20px rgba(15,23,42,0.35)',
-      '0 30px 60px -40px rgba(99,102,241,0.45)',
-      ...Array(22).fill('0 35px 70px -50px rgba(15,23,42,0.45)'),
-    ],
+    shadows: Array(25).fill('none'),
     components: {
       MuiCssBaseline: {
         styleOverrides: {
@@ -80,10 +75,16 @@ export const getTheme = (mode = 'dark') => {
             borderRadius: 999,
             paddingInline: '1.1rem',
             paddingBlock: '0.6rem',
-            transition: 'transform 160ms ease, box-shadow 160ms ease',
+            transition: 'background 160ms ease, transform 160ms ease',
             '&:hover': {
               transform: 'translateY(-1px)',
-              boxShadow: '0 18px 35px -22px rgba(99,102,241,0.55)',
+            },
+          },
+          containedPrimary: {
+            backgroundColor: palette.primary.main,
+            color: palette.primary.contrastText || '#14161b',
+            '&:hover': {
+              backgroundColor: palette.secondary.main,
             },
           },
         },
@@ -92,7 +93,8 @@ export const getTheme = (mode = 'dark') => {
         styleOverrides: {
           root: {
             borderRadius: 16,
-            backdropFilter: 'blur(12px)',
+            backdropFilter: 'blur(6px)',
+            backgroundColor: palette.background.paper,
           },
         },
       },
@@ -100,6 +102,7 @@ export const getTheme = (mode = 'dark') => {
         styleOverrides: {
           root: {
             borderRadius: 16,
+            backgroundColor: palette.background.paper,
           },
         },
       },

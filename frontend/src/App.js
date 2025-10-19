@@ -32,9 +32,27 @@ const AppShell = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 3, px: { xs: 2, lg: 4 }, pb: 8, position: 'relative', zIndex: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        gap: { xs: 2, md: 3 },
+        flex: 1,
+        px: { xs: 2.5, md: 4 },
+        pb: { xs: 3, md: 4 },
+        minHeight: 0,
+      }}
+    >
       <Sidebar activeTool={activeTool} onSelect={handleSelect} hasVideo={hasVideo} />
-      <MainStage activeTool={activeTool} hasVideo={hasVideo} />
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflow: 'auto',
+          pr: { xs: 0, md: 0.5 },
+        }}
+      >
+        <MainStage activeTool={activeTool} hasVideo={hasVideo} />
+      </Box>
     </Box>
   );
 };
@@ -56,45 +74,19 @@ const App = () => {
             minHeight: '100vh',
             bgcolor: theme.palette.background.default,
             color: theme.palette.text.primary,
-            position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              inset: '-45% -25% auto -25%',
-              height: '120%',
-              background: theme.palette.gradient.hero,
-              filter: 'blur(140px)',
-              opacity: 0.85,
-              animation: 'float 18s ease-in-out infinite alternate',
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              width: 420,
-              height: 420,
-              right: '-6%',
-              top: '12%',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle at 30% 30%, rgba(244,114,182,0.45), transparent 60%)',
-              filter: 'blur(65px)',
-              animation: 'pulse 22s ease-in-out infinite',
-            },
-            '@keyframes float': {
-              from: { transform: 'translate3d(0, -4%, 0) scale(1)' },
-              to: { transform: 'translate3d(0, 6%, 0) scale(1.05)' },
-            },
-            '@keyframes pulse': {
-              '0%': { transform: 'scale(0.92) translateY(-12px)', opacity: 0.55 },
-              '50%': { transform: 'scale(1.06) translateY(8px)', opacity: 0.85 },
-              '100%': { transform: 'scale(0.95) translateY(-8px)', opacity: 0.55 },
-            },
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <Box sx={{ position: 'relative', zIndex: 2, pt: 4 }}>
+          <Box
+            sx={{
+              px: { xs: 2.5, md: 4 },
+              pt: { xs: 3, md: 4 },
+            }}
+          >
             <HeaderBar themeMode={themeMode} onToggleTheme={toggleTheme} />
-            <AppShell />
           </Box>
+          <AppShell />
           <StatusOverlay />
           <SnackbarHost />
         </Box>

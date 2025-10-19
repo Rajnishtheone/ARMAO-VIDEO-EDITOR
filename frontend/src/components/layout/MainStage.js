@@ -33,14 +33,31 @@ const MainStage = ({ activeTool, hasVideo }) => {
 
   if (!hasVideo) {
     return (
-      <Box sx={{ flexGrow: 1 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: { xs: 3, md: 4 },
+        }}
+      >
         <ImportPanel />
       </Box>
     );
   }
 
   return (
-    <Stack spacing={3.5} sx={{ flexGrow: 1, maxWidth: 1280, mx: 'auto', width: '100%' }}>
+    <Stack
+      spacing={3}
+      sx={{
+        flexGrow: 1,
+        maxWidth: 1200,
+        mx: 'auto',
+        width: '100%',
+        pb: { xs: 3.5, md: 4.5 },
+      }}
+    >
       <Box
         sx={{
           display: 'grid',
@@ -48,7 +65,7 @@ const MainStage = ({ activeTool, hasVideo }) => {
             xs: 'minmax(0, 1fr)',
             md: 'minmax(0, 1.4fr) minmax(0, 1fr)',
           },
-          gap: 3,
+          gap: { xs: 2.8, md: 3.5 },
           alignItems: 'flex-start',
         }}
       >
